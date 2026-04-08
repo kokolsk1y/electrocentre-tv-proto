@@ -892,24 +892,22 @@ function animateCounter(el, target, dur){
 
 // ═══ TRANSITIONS ═══
 
-// 1. Diagonal Wipe
+// 1. Diagonal Wipe — простая цветная полоса (без контента)
 function transWipe(from, to, done){
   const overlay = document.createElement('div');
   overlay.className = 'trans-overlay';
-  const newBg = document.createElement('div');
-  newBg.className = 'wipe-new';
-  newBg.style.cssText = 'background:'+getComputedStyle(to).background+';display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:'+getComputedStyle(to).color+';overflow:hidden;';
-  newBg.innerHTML = to.innerHTML;
+  const panel = document.createElement('div');
+  panel.style.cssText = 'position:absolute;inset:0;background:'+(getComputedStyle(to).background||getComputedStyle(to).backgroundColor)+';clip-path:polygon(0 0,0 0,0 100%,0 100%);';
   const line = document.createElement('div');
   line.className = 'wipe-line';
-  overlay.appendChild(newBg); overlay.appendChild(line);
+  overlay.appendChild(panel); overlay.appendChild(line);
   stage.appendChild(overlay);
   const dur=750, skew=10, start=performance.now();
   (function tick(now){
     const t=Math.min((now-start)/dur,1);
     const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
     const x=ease*115;
-    newBg.style.clipPath='polygon(0 0,'+x+'% 0,'+(x-skew)+'% 100%,0 100%)';
+    panel.style.clipPath='polygon(0 0,'+x+'% 0,'+(x-skew)+'% 100%,0 100%)';
     line.style.opacity=(t>0.02&&t<0.92)?'1':'0';
     line.style.left=x+'%';
     line.style.transform='translateX(-2px) skewX(-'+skew+'deg)';
@@ -1095,9 +1093,20 @@ function goTo(idx){
   updateDots(idx);
   to.classList.add('on');
 
+  // Скрываем содержимое to для overlay-based переходов (wipe/circuit)
+  // чтобы статичные элементы (фон/декор) не появлялись раньше времени.
+  // Для zoom не скрываем — он анимирует to напрямую.
+  const useOverlay = (mode === 'wipe' || mode === 'circuit');
+  if(useOverlay){
+    to.style.visibility = 'hidden';
+  }
+
   const finish=()=>{
     resetSlide(from); from.classList.remove('on');
     from.style.display='';
+    if(useOverlay){
+      to.style.visibility = '';
+    }
     cur=idx; transitioning=false;
     setTimeout(()=>revealSlide(to),50);
     startProg();
