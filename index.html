@@ -901,25 +901,26 @@ function animateCounter(el, target, dur){
 
 // ═══ TRANSITIONS ═══
 
-// 1. Diagonal Wipe — простая цветная полоса (без контента)
+// 1. Wipe — чистая вертикальная стенка с глоу-линией
 function transWipe(from, to, done){
   const overlay = document.createElement('div');
   overlay.className = 'trans-overlay';
   const panel = document.createElement('div');
-  panel.style.cssText = 'position:absolute;inset:0;background:'+(getComputedStyle(to).background||getComputedStyle(to).backgroundColor)+';clip-path:polygon(0 0,0 0,0 100%,0 100%);';
+  panel.style.cssText = 'position:absolute;inset:0;background:'+(getComputedStyle(to).background||getComputedStyle(to).backgroundColor)+';clip-path:inset(0 100% 0 0);';
   const line = document.createElement('div');
   line.className = 'wipe-line';
   overlay.appendChild(panel); overlay.appendChild(line);
   stage.appendChild(overlay);
-  const dur=750, skew=10, start=performance.now();
+  const dur=750, start=performance.now();
   (function tick(now){
     const t=Math.min((now-start)/dur,1);
     const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-    const x=ease*115;
-    panel.style.clipPath='polygon(0 0,'+x+'% 0,'+(x-skew)+'% 100%,0 100%)';
-    line.style.opacity=(t>0.02&&t<0.92)?'1':'0';
-    line.style.left=x+'%';
-    line.style.transform='translateX(-2px) skewX(-'+skew+'deg)';
+    const x=ease*100;
+    // inset(top right bottom left) — клипаем справа = 100-x
+    panel.style.clipPath='inset(0 '+(100-x)+'% 0 0)';
+    line.style.opacity=(t>0.02&&t<0.95)?'1':'0';
+    line.style.left='calc('+x+'% - 3px)';
+    line.style.transform='none';
     if(t<1) requestAnimationFrame(tick);
     else { stage.removeChild(overlay); done(); }
   })(performance.now());
