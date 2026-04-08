@@ -45,14 +45,18 @@ html, body {
   box-shadow:0 0 30px var(--or), 0 0 80px rgba(232,66,10,0.45), 0 0 120px rgba(232,66,10,0.25);
   opacity:0; z-index:2;
 }
-/* Lightning Strike */
+/* Electric Discharge */
 .lightning-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
-.lightning-bolt { fill:none; stroke:#fff; stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
-  filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px var(--or)) drop-shadow(0 0 40px var(--or)) drop-shadow(0 0 80px rgba(232,66,10,0.5));
+.lightning-bolt { fill:none; stroke:#fff; stroke-width:3; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px #fff) drop-shadow(0 0 24px var(--or)) drop-shadow(0 0 60px var(--or));
   opacity:0; }
-.lightning-bolt.bg { stroke:var(--or); stroke-width:12; opacity:0;
-  filter:drop-shadow(0 0 20px var(--or)) drop-shadow(0 0 60px rgba(232,66,10,0.6)); }
-.lightning-flash { position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(255,240,220,0.95) 0%, rgba(255,180,80,0.6) 30%, rgba(232,66,10,0.2) 60%, transparent 100%); opacity:0; mix-blend-mode:screen; }
+.lightning-bolt.glow { stroke:var(--or); stroke-width:14; opacity:0;
+  filter:drop-shadow(0 0 20px var(--or)) drop-shadow(0 0 50px var(--or)) drop-shadow(0 0 100px rgba(232,66,10,0.6)); }
+.lightning-bolt.core { stroke:#fff; stroke-width:1.5; opacity:0;
+  filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px #fff); }
+.lightning-core-spark { fill:#fff; opacity:0;
+  filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 30px var(--or2)) drop-shadow(0 0 80px var(--or)); }
+.lightning-flash { position:absolute; inset:0; background:radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,220,150,0.95) 15%, rgba(255,140,40,0.7) 35%, rgba(232,66,10,0.3) 60%, transparent 100%); opacity:0; mix-blend-mode:screen; }
 .lightning-cover { position:absolute; inset:0; }
 
 /* ══ TOP PROGRESS ══ */
@@ -90,13 +94,23 @@ html, body {
 .aws-color-dot.white { background:#fff; box-shadow:0 0 12px rgba(255,255,255,0.4); }
 .aws-color-dot.black { background:#000; border:1px solid rgba(255,255,255,0.4); box-shadow:0 0 12px rgba(0,0,0,0.6); }
 .aws-color-text { transition:opacity 0.6s ease; }
-.aws-right { width:920px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-.aws-morph-wrap { position:relative; width:600px; height:600px; }
-.aws-morph-wrap img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 20px 60px rgba(0,0,0,0.7)); transition:opacity 1.4s ease, transform 1.4s ease; }
+.aws-right {
+  width:920px; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg, #f8f9fc 0%, #eef0f6 100%);
+}
+/* Мягкий перелив на границе светлого и тёмного */
+.aws-right::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:120px;
+  background:linear-gradient(90deg, rgba(10,10,12,0.6) 0%, transparent 100%);
+  pointer-events:none; z-index:5;
+}
+.aws-morph-wrap { position:relative; width:680px; height:680px; z-index:1; }
+.aws-morph-wrap img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 30px 60px rgba(27,48,115,0.18)); transition:opacity 1.4s ease, transform 1.4s ease; }
 .aws-morph-wrap img.fade-in { opacity:1; transform:scale(1); }
 .aws-morph-wrap img.fade-out { opacity:0; transform:scale(1.04); }
-.aws-glow-wrap { position:absolute; width:700px; height:700px; border-radius:50%; background:radial-gradient(circle, rgba(232,66,10,0.05) 0%, transparent 70%); pointer-events:none; }
-.aws-loc { position:absolute; bottom:28px; right:28px; z-index:2; font-size:13px; font-weight:600; color:rgba(255,255,255,0.2); letter-spacing:2px; text-transform:uppercase; }
+.aws-glow-wrap { position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle, rgba(232,66,10,0.06) 0%, transparent 70%); pointer-events:none; }
+.aws-loc { position:absolute; bottom:28px; right:36px; z-index:2; font-size:13px; font-weight:700; color:rgba(27,48,115,0.4); letter-spacing:3px; text-transform:uppercase; }
 
 /* ══ AWS SLIDE LIGHT ══ */
 .s-aws-lt { background:var(--wh); padding:0 !important; flex-direction:row !important; align-items:stretch !important; text-align:left !important; position:relative; }
@@ -932,87 +946,103 @@ function transZoom(from, to, done){
   },720);
 }
 
-// 3. Lightning Strike — молния со вспышкой (для AWS)
+// 3. Electric Discharge — разряд от центра с органичными молниями
 function transCircuit(from, to, done){
   const overlay = document.createElement('div');
   overlay.className = 'trans-overlay';
 
-  // Контейнер с новым слайдом снизу
   const cover = document.createElement('div');
   cover.className = 'lightning-cover';
   cover.style.background = getComputedStyle(to).background || getComputedStyle(to).backgroundColor;
   cover.style.opacity = '0';
   overlay.appendChild(cover);
 
-  // SVG для молнии
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(svgNS, 'svg');
   svg.setAttribute('viewBox', '0 0 1920 942');
   svg.setAttribute('preserveAspectRatio', 'none');
   svg.classList.add('lightning-svg');
 
-  // Генерируем зигзагообразный путь молнии
-  function generateBolt(startY, endY, segments){
-    const points = [];
-    points.push([-30, startY]);
-    for(let i=1; i<segments; i++){
-      const t = i/segments;
-      const x = t * 1980;
-      const baseY = startY + (endY - startY) * t;
-      const offset = (Math.random() - 0.5) * 280;
-      points.push([x, baseY + offset]);
+  // ─── Midpoint displacement: рекурсивно генерирует ломаную ───
+  function generateBolt(x1, y1, x2, y2, displace, detail){
+    if(displace < detail){
+      return [[x1, y1], [x2, y2]];
     }
-    points.push([1950, endY]);
-    return 'M ' + points.map(p => p.join(',')).join(' L ');
+    const mx = (x1 + x2) / 2 + (Math.random() - 0.5) * displace;
+    const my = (y1 + y2) / 2 + (Math.random() - 0.5) * displace;
+    const left = generateBolt(x1, y1, mx, my, displace * 0.55, detail);
+    const right = generateBolt(mx, my, x2, y2, displace * 0.55, detail);
+    return left.concat(right.slice(1));
+  }
+  function pointsToPath(points){
+    return 'M ' + points.map(p => p[0].toFixed(0) + ',' + p[1].toFixed(0)).join(' L ');
   }
 
-  // Главная молния — пересекает экран по диагонали
-  const startY = 200 + Math.random() * 200;
-  const endY = 500 + Math.random() * 250;
-  const mainPath = generateBolt(startY, endY, 9);
+  // ─── Центр разряда ───
+  const cx = 960, cy = 470;
 
-  // Фоновое широкое свечение
-  const boltBg = document.createElementNS(svgNS, 'path');
-  boltBg.setAttribute('d', mainPath);
-  boltBg.classList.add('lightning-bolt', 'bg');
-  svg.appendChild(boltBg);
+  // Главные молнии — 7 штук во все стороны от центра
+  const numBolts = 7;
+  const bolts = [];
+  for(let i = 0; i < numBolts; i++){
+    // Угол — равномерно по кругу + лёгкий рандом
+    const angle = (i / numBolts) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+    // Длина — почти до края экрана
+    const length = 900 + Math.random() * 300;
+    const ex = cx + Math.cos(angle) * length;
+    const ey = cy + Math.sin(angle) * length;
 
-  // Основная яркая молния
-  const bolt = document.createElementNS(svgNS, 'path');
-  bolt.setAttribute('d', mainPath);
-  bolt.classList.add('lightning-bolt');
-  svg.appendChild(bolt);
+    // Genentate organic path with midpoint displacement
+    const points = generateBolt(cx, cy, ex, ey, 220, 8);
+    const pathD = pointsToPath(points);
 
-  // Ответвления (2-3 короткие молнии от основной)
-  const branches = [];
-  for(let i = 0; i < 3; i++){
-    const branchStartT = 0.25 + i * 0.22;
-    const branchStartX = branchStartT * 1980;
-    const branchStartY = startY + (endY - startY) * branchStartT + (Math.random() - 0.5) * 150;
-    const branchEndX = branchStartX + (Math.random() - 0.5) * 400;
-    const branchEndY = branchStartY + (Math.random() > 0.5 ? 1 : -1) * (150 + Math.random() * 200);
+    // 3 слоя: широкое свечение + основная + яркое ядро
+    const glow = document.createElementNS(svgNS, 'path');
+    glow.setAttribute('d', pathD);
+    glow.classList.add('lightning-bolt', 'glow');
+    svg.appendChild(glow);
 
-    const bp = [];
-    bp.push([branchStartX, branchStartY]);
-    bp.push([branchStartX + (branchEndX - branchStartX) * 0.4 + (Math.random() - 0.5) * 80,
-             branchStartY + (branchEndY - branchStartY) * 0.4 + (Math.random() - 0.5) * 80]);
-    bp.push([branchEndX, branchEndY]);
-    const branchD = 'M ' + bp.map(p => p.join(',')).join(' L ');
+    const main = document.createElementNS(svgNS, 'path');
+    main.setAttribute('d', pathD);
+    main.classList.add('lightning-bolt');
+    svg.appendChild(main);
 
-    const bg = document.createElementNS(svgNS, 'path');
-    bg.setAttribute('d', branchD);
-    bg.classList.add('lightning-bolt', 'bg');
-    bg.style.strokeWidth = '8';
-    svg.appendChild(bg);
+    const core = document.createElementNS(svgNS, 'path');
+    core.setAttribute('d', pathD);
+    core.classList.add('lightning-bolt', 'core');
+    svg.appendChild(core);
 
-    const br = document.createElementNS(svgNS, 'path');
-    br.setAttribute('d', branchD);
-    br.classList.add('lightning-bolt');
-    br.style.strokeWidth = '3';
-    svg.appendChild(br);
+    // Branch — короткое ответвление от середины пути
+    const branchStart = points[Math.floor(points.length * 0.5)];
+    const branchAngle = angle + (Math.random() > 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.6);
+    const branchLen = 200 + Math.random() * 250;
+    const bex = branchStart[0] + Math.cos(branchAngle) * branchLen;
+    const bey = branchStart[1] + Math.sin(branchAngle) * branchLen;
+    const branchPoints = generateBolt(branchStart[0], branchStart[1], bex, bey, 80, 6);
+    const branchD = pointsToPath(branchPoints);
 
-    branches.push({bg, br});
+    const branchGlow = document.createElementNS(svgNS, 'path');
+    branchGlow.setAttribute('d', branchD);
+    branchGlow.classList.add('lightning-bolt', 'glow');
+    branchGlow.style.strokeWidth = '8';
+    svg.appendChild(branchGlow);
+
+    const branchMain = document.createElementNS(svgNS, 'path');
+    branchMain.setAttribute('d', branchD);
+    branchMain.classList.add('lightning-bolt');
+    branchMain.style.strokeWidth = '2';
+    svg.appendChild(branchMain);
+
+    bolts.push({glow, main, core, branchGlow, branchMain});
   }
+
+  // Центральная искра — белая точка из которой идёт разряд
+  const spark = document.createElementNS(svgNS, 'circle');
+  spark.setAttribute('cx', cx);
+  spark.setAttribute('cy', cy);
+  spark.setAttribute('r', '0');
+  spark.classList.add('lightning-core-spark');
+  svg.appendChild(spark);
 
   // Вспышка на весь экран
   const flash = document.createElement('div');
@@ -1025,54 +1055,79 @@ function transCircuit(from, to, done){
   const start = performance.now();
 
   // Тайминг:
-  // 0-180мс: молния появляется (резко, без плавности — как настоящая)
-  // 180-350мс: яркая вспышка на весь экран
-  // 350-650мс: затухание + раскрытие нового слайда
-  const PHASE1 = 180;  // молния
-  const PHASE2 = 350;  // вспышка пик
-  const PHASE3 = 650;  // финал
+  // 0-80мс:    искра растёт в центре
+  // 80-160мс:  молнии резко появляются + мерцают
+  // 160-340мс: ВСПЫШКА на весь экран (пик)
+  // 340-700мс: затухание + проявление нового слайда
+  const PHASE1 = 80;
+  const PHASE2 = 160;
+  const PHASE3 = 340;
+  const PHASE4 = 700;
 
   (function tick(now){
     const elapsed = now - start;
 
+    // Фаза 1: искра растёт
     if(elapsed < PHASE1){
-      // Молния появляется ступенчато
       const t = elapsed / PHASE1;
-      // Молния "проявляется" толчками — мерцание
-      const flicker = (Math.sin(t * 30) + 1) / 2;
-      const opacity = Math.min(1, t * 3) * (0.7 + flicker * 0.3);
-      bolt.style.opacity = opacity;
-      boltBg.style.opacity = opacity * 0.8;
-      branches.forEach((b, i) => {
-        if(t > 0.2 + i * 0.15){
-          b.bg.style.opacity = (0.5 + flicker * 0.4);
-          b.br.style.opacity = (0.7 + flicker * 0.3);
+      const ease = 1 - Math.pow(1 - t, 3);
+      spark.setAttribute('r', (ease * 25).toFixed(1));
+      spark.style.opacity = ease.toFixed(2);
+    }
+    // Фаза 2: молнии разряжаются
+    else if(elapsed < PHASE2){
+      const t = (elapsed - PHASE1) / (PHASE2 - PHASE1);
+      // Резкое мерцание (электрическое)
+      const flicker = Math.random() * 0.4 + 0.6;
+      spark.setAttribute('r', '40');
+      spark.style.opacity = '1';
+      bolts.forEach((b, i) => {
+        // Появляются волной от центра
+        if(t > i * 0.06){
+          b.glow.style.opacity = (0.7 * flicker).toFixed(2);
+          b.main.style.opacity = flicker.toFixed(2);
+          b.core.style.opacity = '1';
+          b.branchGlow.style.opacity = (0.5 * flicker).toFixed(2);
+          b.branchMain.style.opacity = (0.9 * flicker).toFixed(2);
         }
       });
+      // Вспышка начинает проявляться
+      flash.style.opacity = (t * 0.4).toFixed(2);
     }
-    else if(elapsed < PHASE2){
-      // Пик вспышки — экран заливает белым
-      const t = (elapsed - PHASE1) / (PHASE2 - PHASE1);
-      const flashOp = 1 - t * 0.15;
-      flash.style.opacity = flashOp;
-      bolt.style.opacity = '1';
-      boltBg.style.opacity = '1';
-      branches.forEach(b => { b.bg.style.opacity = '0.9'; b.br.style.opacity = '1'; });
-      // Начинаем показывать новый слайд под вспышкой
-      cover.style.opacity = (t * 0.5).toString();
-    }
+    // Фаза 3: пик вспышки — экран ярко-белый
     else if(elapsed < PHASE3){
-      // Затухание вспышки, новый слайд проявляется
       const t = (elapsed - PHASE2) / (PHASE3 - PHASE2);
-      const ease = 1 - Math.pow(1 - t, 2);
-      flash.style.opacity = (1 - ease) * 0.85;
-      bolt.style.opacity = (1 - ease) * 0.8;
-      boltBg.style.opacity = (1 - ease) * 0.6;
-      branches.forEach(b => {
-        b.bg.style.opacity = (1 - ease) * 0.5;
-        b.br.style.opacity = (1 - ease) * 0.7;
+      // Электрическое мерцание молнии
+      const flicker = Math.random() * 0.3 + 0.7;
+      bolts.forEach(b => {
+        b.glow.style.opacity = (0.8 * flicker).toFixed(2);
+        b.main.style.opacity = flicker.toFixed(2);
+        b.core.style.opacity = '1';
+        b.branchGlow.style.opacity = (0.6 * flicker).toFixed(2);
+        b.branchMain.style.opacity = (0.95 * flicker).toFixed(2);
       });
-      cover.style.opacity = (0.5 + ease * 0.5).toString();
+      spark.setAttribute('r', (40 + t * 30).toFixed(0));
+      // Вспышка достигает пика
+      flash.style.opacity = (0.4 + t * 0.6).toFixed(2);
+      // Cover начинает проявляться под вспышкой
+      cover.style.opacity = (t * 0.4).toFixed(2);
+    }
+    // Фаза 4: затухание + новый слайд
+    else if(elapsed < PHASE4){
+      const t = (elapsed - PHASE3) / (PHASE4 - PHASE3);
+      const ease = 1 - Math.pow(1 - t, 2);
+      const fade = 1 - ease;
+      bolts.forEach(b => {
+        b.glow.style.opacity = (0.7 * fade).toFixed(2);
+        b.main.style.opacity = (0.9 * fade).toFixed(2);
+        b.core.style.opacity = fade.toFixed(2);
+        b.branchGlow.style.opacity = (0.5 * fade).toFixed(2);
+        b.branchMain.style.opacity = (0.8 * fade).toFixed(2);
+      });
+      spark.style.opacity = fade.toFixed(2);
+      flash.style.opacity = (1 - ease * 0.85).toFixed(2);
+      cover.style.opacity = (0.4 + ease * 0.6).toFixed(2);
+      svg.style.opacity = (1 - ease * 0.6).toFixed(2);
     }
     else {
       stage.removeChild(overlay);
