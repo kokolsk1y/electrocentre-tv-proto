@@ -40,9 +40,9 @@ html, body {
 .trans-overlay { position:absolute; top:70px; bottom:68px; left:0; right:0; z-index:100; pointer-events:none; overflow:hidden; }
 .wipe-new { position:absolute; inset:0; clip-path:polygon(0 0,0 0,0 100%,0 100%); }
 .wipe-line {
-  position:absolute; top:0; bottom:0; width:4px;
+  position:absolute; top:0; bottom:0; width:6px;
   background:linear-gradient(180deg, var(--or), var(--or2), var(--or));
-  box-shadow:0 0 20px var(--or), 0 0 50px rgba(232,66,10,0.25);
+  box-shadow:0 0 30px var(--or), 0 0 80px rgba(232,66,10,0.45), 0 0 120px rgba(232,66,10,0.25);
   opacity:0; z-index:2;
 }
 /* Circuit trace */
@@ -62,42 +62,44 @@ html, body {
 .top-prog { position:absolute; top:70px; left:0; right:0; height:3px; z-index:250; background:rgba(27,48,115,0.06); }
 .top-prog-fill { height:100%; width:0%; background:linear-gradient(90deg, var(--or), var(--or2)); box-shadow:0 0 8px rgba(232,66,10,0.35); transition:width 0.1s linear; }
 
-/* ══ REVEAL ANIMATIONS ══ */
+/* ══ REVEAL ANIMATIONS — плавные с паузами ══ */
 .rv-stamp { opacity:0; transform:scale(1.3); filter:blur(4px); }
-.rv-stamp.ani { opacity:1; transform:scale(1); filter:blur(0); transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+.rv-stamp.ani { opacity:1; transform:scale(1); filter:blur(0); transition:all 0.7s cubic-bezier(0.34,1.56,0.64,1); }
 .rv-clip { clip-path:inset(0 100% 0 0); }
-.rv-clip.ani { clip-path:inset(0 0 0 0); transition:clip-path 0.7s cubic-bezier(0.4,0,0.2,1); }
-.rv-fade { opacity:0; transform:translateY(18px); }
-.rv-fade.ani { opacity:1; transform:translateY(0); transition:all 0.7s ease; }
-.rv-spring { opacity:0; transform:translateX(-35px); }
-.rv-spring.ani { opacity:1; transform:translateX(0); transition:all 0.65s cubic-bezier(0.34,1.56,0.64,1); }
-.rv-focus { opacity:0; transform:scale(1.08); filter:blur(18px); }
-.rv-focus.ani { opacity:1; transform:scale(1); filter:blur(0); transition:all 0.75s cubic-bezier(0.4,0,0.2,1); }
+.rv-clip.ani { clip-path:inset(0 0 0 0); transition:clip-path 0.95s cubic-bezier(0.4,0,0.2,1); }
+.rv-fade { opacity:0; transform:translateY(22px); }
+.rv-fade.ani { opacity:1; transform:translateY(0); transition:all 0.9s cubic-bezier(0.25,0.1,0.25,1); }
+.rv-spring { opacity:0; transform:translateX(-40px); }
+.rv-spring.ani { opacity:1; transform:translateX(0); transition:all 0.85s cubic-bezier(0.34,1.56,0.64,1); }
+.rv-focus { opacity:0; transform:scale(1.08); filter:blur(20px); }
+.rv-focus.ani { opacity:1; transform:scale(1); filter:blur(0); transition:all 1s cubic-bezier(0.4,0,0.2,1); }
 .rv-appear { opacity:0; }
-.rv-appear.ani { opacity:1; transition:opacity 0.6s ease; }
+.rv-appear.ani { opacity:1; transition:opacity 0.8s ease; }
 @keyframes pricePulse { 0%,100%{text-shadow:0 0 0 transparent;} 50%{text-shadow:0 0 24px rgba(232,66,10,0.25);} }
 .price-pulse { animation:pricePulse 3s ease-in-out infinite; }
 
-/* ══ AWS SLIDE (белый фон) ══ */
-.s-aws { background:var(--wh); padding:0 !important; flex-direction:row !important; align-items:stretch !important; justify-content:flex-start !important; text-align:left !important; }
-.aws-grid-bg { display:none; }
-.aws-line-l { position:absolute; left:0; top:0; bottom:0; width:5px; background:linear-gradient(180deg, transparent 10%, var(--or) 30%, var(--or2) 70%, transparent 90%); z-index:3; }
-.aws-wm { position:absolute; bottom:-20px; right:30px; font-size:180px; font-weight:900; color:rgba(27,48,115,0.035); white-space:nowrap; letter-spacing:-5px; z-index:0; }
-.aws-left { flex:1; display:flex; flex-direction:column; justify-content:center; padding:50px 40px 50px 80px; z-index:2; }
-.aws-badge { display:inline-flex; align-items:center; gap:10px; padding:10px 26px; margin-bottom:22px; background:rgba(232,66,10,0.06); border:1px solid rgba(232,66,10,0.2); font-size:14px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--or); width:fit-content; }
-.aws-title { font-size:72px; font-weight:900; line-height:1.08; color:var(--txt); margin-bottom:8px; }
-.aws-title .or { color:var(--or); }
-.aws-sub { font-size:22px; font-weight:400; color:var(--txt2); margin-bottom:32px; }
-.aws-features { display:flex; flex-direction:column; gap:10px; margin-bottom:36px; }
-.aws-feat { display:flex; align-items:center; gap:14px; padding:14px 22px; background:var(--lt); border:1px solid rgba(27,48,115,0.06); border-left:4px solid var(--or); font-size:22px; font-weight:600; color:var(--txt); }
-.aws-price-row { display:flex; align-items:baseline; gap:14px; }
-.aws-price { font-size:68px; font-weight:900; color:var(--or); font-variant-numeric:tabular-nums; }
-.aws-price-note { font-size:18px; font-weight:500; color:var(--txt2); }
-.aws-right { width:720px; position:relative; overflow:hidden; background:#fff; }
-.aws-glow { display:none; }
-.aws-img { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:1; }
-.aws-img img { width:85%; height:85%; object-fit:contain; filter:drop-shadow(0 12px 40px rgba(27,48,115,0.12)); }
-.aws-loc { position:absolute; bottom:28px; right:28px; z-index:2; font-size:15px; font-weight:600; color:rgba(27,48,115,0.2); letter-spacing:2px; text-transform:uppercase; }
+/* ══ AWS МОРФИНГ ЦВЕТА (тёмный, как на сайте) ══ */
+.s-aws { background:linear-gradient(145deg, #0a0a0a 0%, #111114 50%, #0e0e12 100%); padding:0 !important; flex-direction:row !important; align-items:stretch !important; justify-content:flex-start !important; text-align:left !important; position:relative; }
+.aws-grid-bg { position:absolute; inset:0; opacity:0.02; background-image:linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px); background-size:80px 80px; pointer-events:none; }
+.aws-line-l { position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg, transparent 10%, var(--or) 35%, var(--or2) 65%, transparent 90%); z-index:3; opacity:0.5; }
+.aws-wm { position:absolute; bottom:-30px; right:40px; font-size:200px; font-weight:900; color:rgba(255,255,255,0.018); white-space:nowrap; letter-spacing:-5px; z-index:0; font-style:italic; }
+.aws-left { flex:1; display:flex; flex-direction:column; justify-content:center; padding:60px 40px 60px 100px; z-index:2; }
+.aws-num { font-size:140px; font-weight:900; line-height:1; color:rgba(255,255,255,0.05); letter-spacing:-4px; margin-bottom:-20px; }
+.aws-badge { display:inline-flex; align-items:center; gap:10px; padding:8px 0; margin-bottom:18px; font-size:13px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.5); width:fit-content; }
+.aws-title { font-size:96px; font-weight:900; line-height:1; color:#fff; margin-bottom:24px; letter-spacing:-2px; }
+.aws-sub { font-size:22px; font-weight:300; color:rgba(255,255,255,0.5); line-height:1.5; max-width:520px; margin-bottom:48px; }
+.aws-color-label { display:flex; align-items:center; gap:14px; font-size:14px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.4); }
+.aws-color-dot { width:14px; height:14px; border-radius:50%; transition:background 1.2s ease, box-shadow 1.2s ease; }
+.aws-color-dot.white { background:#fff; box-shadow:0 0 12px rgba(255,255,255,0.4); }
+.aws-color-dot.black { background:#000; border:1px solid rgba(255,255,255,0.4); box-shadow:0 0 12px rgba(0,0,0,0.6); }
+.aws-color-text { transition:opacity 0.6s ease; }
+.aws-right { width:920px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.aws-morph-wrap { position:relative; width:600px; height:600px; }
+.aws-morph-wrap img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 20px 60px rgba(0,0,0,0.7)); transition:opacity 1.4s ease, transform 1.4s ease; }
+.aws-morph-wrap img.fade-in { opacity:1; transform:scale(1); }
+.aws-morph-wrap img.fade-out { opacity:0; transform:scale(1.04); }
+.aws-glow-wrap { position:absolute; width:700px; height:700px; border-radius:50%; background:radial-gradient(circle, rgba(232,66,10,0.05) 0%, transparent 70%); pointer-events:none; }
+.aws-loc { position:absolute; bottom:28px; right:28px; z-index:2; font-size:13px; font-weight:600; color:rgba(255,255,255,0.2); letter-spacing:2px; text-transform:uppercase; }
 
 /* ══ AWS SLIDE LIGHT ══ */
 .s-aws-lt { background:var(--wh); padding:0 !important; flex-direction:row !important; align-items:stretch !important; text-align:left !important; position:relative; }
@@ -605,29 +607,28 @@ html, body {
     </div>
   </div>
 
-  <!-- ═══ СЛАЙД 6: AWS AURA (тёмный) ═══ -->
-  <div class="slide s-aws" id="s4" data-duration="10000" data-trans="circuit">
+  <!-- ═══ СЛАЙД: AWS AURA — морфинг цвета ═══ -->
+  <div class="slide s-aws" id="s4" data-duration="12000" data-trans="circuit">
     <div class="aws-grid-bg"></div>
     <div class="aws-line-l"></div>
     <div class="aws-wm">AWSproducts</div>
     <div class="aws-left">
-      <div class="aws-badge rv rv-stamp">AWS · AURA</div>
-      <div class="aws-title rv rv-clip">РОЗЕТКА С USB<br>И <span class="or">TYPE-C</span></div>
-      <div class="aws-sub rv rv-fade">Закалённое стекло · Белый · Чёрный · Золото</div>
-      <div class="aws-features">
-        <div class="aws-feat rv rv-spring">&#9889; Быстрая зарядка 18W</div>
-        <div class="aws-feat rv rv-spring">&#128274; Защита от перегрузки</div>
-        <div class="aws-feat rv rv-spring">&#10003; Совместимо с рамками Aura</div>
-      </div>
-      <div class="aws-price-row rv rv-appear">
-        <div class="aws-price counter" data-target="817">0 &#8381;</div>
-        <div class="aws-price-note">В наличии</div>
+      <div class="aws-num rv rv-fade">03</div>
+      <div class="aws-badge rv rv-stamp">Серия · AURA</div>
+      <div class="aws-title rv rv-clip">Эстетика</div>
+      <div class="aws-sub rv rv-fade">Универсальные формы и цвета.<br>Два тона — для любого пространства.<br>Минимум формы, максимум смысла.</div>
+      <div class="aws-color-label rv rv-appear">
+        <div class="aws-color-dot white" id="auraDot"></div>
+        <span class="aws-color-text" id="auraColorText">БЕЛЫЙ</span>
       </div>
     </div>
     <div class="aws-right">
-      <div class="aws-glow rv rv-focus"></div>
-      <div class="aws-img rv rv-focus"><img src="img/aws-aura-a026w.webp" alt="AWS Aura A-026W"></div>
-      <div class="aws-loc rv rv-appear">Стеллаж В2</div>
+      <div class="aws-glow-wrap rv rv-focus"></div>
+      <div class="aws-morph-wrap rv rv-focus" data-morph="aura">
+        <img src="img/aws-aura-a026w.webp" class="fade-in" data-color="white" alt="AWS Aura белая">
+        <img src="img/aws-aura-a026b.webp" class="fade-out" data-color="black" alt="AWS Aura чёрная">
+      </div>
+      <div class="aws-loc rv rv-appear">awsproducts.ru</div>
     </div>
   </div>
 
@@ -731,25 +732,28 @@ html, body {
     <img src="img/banner-04.png" alt="Акция">
   </div>
 
-  <!-- ═══ СЛАЙД 10: AWS UNO (светлый) ═══ -->
-  <div class="slide s-aws-lt" id="s9" data-duration="10000" data-trans="circuit">
-    <div class="awslt-wm">AWSproducts</div>
-    <div class="awslt-left">
-      <div class="awslt-img rv rv-focus"><img src="img/aws-uno-u1a001.webp" alt="AWS Uno U1A-001-1"></div>
+  <!-- ═══ СЛАЙД: AWS UNO — морфинг цвета ═══ -->
+  <div class="slide s-aws" id="s9" data-duration="12000" data-trans="circuit">
+    <div class="aws-grid-bg"></div>
+    <div class="aws-line-l"></div>
+    <div class="aws-wm">AWSproducts</div>
+    <div class="aws-left">
+      <div class="aws-num rv rv-fade">02</div>
+      <div class="aws-badge rv rv-stamp">Серия · UNO SoftTouch</div>
+      <div class="aws-title rv rv-clip">Тактильность</div>
+      <div class="aws-sub rv rv-fade">Бархатистое покрытие.<br>Тихий ход клавиши.<br>Лёгкое касание — точный отклик.</div>
+      <div class="aws-color-label rv rv-appear">
+        <div class="aws-color-dot white" id="unoDot"></div>
+        <span class="aws-color-text" id="unoColorText">БЕЛЫЙ</span>
+      </div>
     </div>
-    <div class="awslt-right">
-      <div class="awslt-badge rv rv-stamp">AWS · UNO SoftTouch</div>
-      <div class="awslt-title rv rv-clip">ВЫКЛЮЧАТЕЛИ<br><span class="or">НОВОГО УРОВНЯ</span></div>
-      <div class="awslt-sub rv rv-fade">Матовое покрытие · Мягкий ход · Тихий клик</div>
-      <div class="awslt-feats">
-        <div class="awslt-feat rv rv-spring">&#9898; Серия SoftTouch — приятно на ощупь</div>
-        <div class="awslt-feat rv rv-spring">&#127912; 2 цвета: белый и чёрный</div>
-        <div class="awslt-feat rv rv-spring">&#128260; Единая система рамок</div>
+    <div class="aws-right">
+      <div class="aws-glow-wrap rv rv-focus"></div>
+      <div class="aws-morph-wrap rv rv-focus" data-morph="uno">
+        <img src="img/aws-uno-u1a001.webp" class="fade-in" data-color="white" alt="AWS Uno белый">
+        <img src="img/aws-uno-u2b001.webp" class="fade-out" data-color="black" alt="AWS Uno чёрный">
       </div>
-      <div class="awslt-price-row rv rv-appear">
-        <div class="awslt-price counter" data-target="94">0 &#8381;</div>
-        <div class="awslt-price-note">от · В наличии</div>
-      </div>
+      <div class="aws-loc rv rv-appear">awsproducts.ru</div>
     </div>
   </div>
 
@@ -821,13 +825,62 @@ function revealSlide(el){
     setTimeout(()=>{
       item.classList.add('ani');
       const counter = item.querySelector('.counter');
-      if(counter) animateCounter(counter, parseInt(counter.dataset.target), 900);
-    }, 150 + i * 280);
+      if(counter) animateCounter(counter, parseInt(counter.dataset.target), 1100);
+    }, 350 + i * 420);
   });
+  // Запуск морфинга цвета на AWS слайдах
+  startColorMorph(el);
+}
+
+let _morphTimers = [];
+function stopColorMorph(){
+  _morphTimers.forEach(clearInterval);
+  _morphTimers.forEach(clearTimeout);
+  _morphTimers = [];
+}
+function startColorMorph(el){
+  stopColorMorph();
+  const morph = el.querySelector('.aws-morph-wrap');
+  if(!morph) return;
+  const imgs = morph.querySelectorAll('img');
+  if(imgs.length < 2) return;
+  const dot = el.querySelector('.aws-color-dot');
+  const text = el.querySelector('.aws-color-text');
+  let isWhite = true;
+  // Старт через 2.5 сек после появления слайда
+  const initial = setTimeout(function tick(){
+    isWhite = !isWhite;
+    imgs.forEach(img=>{
+      const isThisWhite = img.dataset.color === 'white';
+      const showThis = (isThisWhite && isWhite) || (!isThisWhite && !isWhite);
+      img.classList.toggle('fade-in', showThis);
+      img.classList.toggle('fade-out', !showThis);
+    });
+    if(dot){
+      dot.classList.toggle('white', isWhite);
+      dot.classList.toggle('black', !isWhite);
+    }
+    if(text){
+      text.style.opacity = '0';
+      setTimeout(()=>{ text.textContent = isWhite ? 'БЕЛЫЙ' : 'ЧЁРНЫЙ'; text.style.opacity='1'; }, 600);
+    }
+    const t = setTimeout(tick, 2800);
+    _morphTimers.push(t);
+  }, 2500);
+  _morphTimers.push(initial);
 }
 function resetSlide(el){
   el.querySelectorAll('.rv').forEach(item=>item.classList.remove('ani'));
   el.querySelectorAll('.counter').forEach(c=>{ c.textContent='0 \u20BD'; c.classList.remove('price-pulse'); });
+  stopColorMorph();
+  // Сброс морфинга к белому
+  el.querySelectorAll('.aws-morph-wrap img').forEach(img=>{
+    const isWhite = img.dataset.color === 'white';
+    img.classList.toggle('fade-in', isWhite);
+    img.classList.toggle('fade-out', !isWhite);
+  });
+  el.querySelectorAll('.aws-color-dot').forEach(d=>{ d.classList.add('white'); d.classList.remove('black'); });
+  el.querySelectorAll('.aws-color-text').forEach(t=>t.textContent='БЕЛЫЙ');
 }
 function animateCounter(el, target, dur){
   const start = performance.now();
@@ -854,7 +907,7 @@ function transWipe(from, to, done){
   line.className = 'wipe-line';
   overlay.appendChild(newBg); overlay.appendChild(line);
   stage.appendChild(overlay);
-  const dur=550, skew=8, start=performance.now();
+  const dur=750, skew=10, start=performance.now();
   (function tick(now){
     const t=Math.min((now-start)/dur,1);
     const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
@@ -868,20 +921,20 @@ function transWipe(from, to, done){
   })(performance.now());
 }
 
-// 2. Zoom Morph
+// 2. Zoom Morph — усиленный
 function transZoom(from, to, done){
   to.style.transition='none'; to.style.display='flex'; to.style.opacity='0';
-  to.style.transform='scale(0.93)'; to.style.filter='blur(12px)';
+  to.style.transform='scale(0.88)'; to.style.filter='blur(20px)';
   requestAnimationFrame(()=>{
-    from.style.transition='all 0.5s cubic-bezier(0.4,0,0.2,1)';
-    from.style.transform='scale(1.06)'; from.style.filter='blur(12px)'; from.style.opacity='0';
-    to.style.transition='all 0.5s cubic-bezier(0.4,0,0.2,1)';
+    from.style.transition='all 0.7s cubic-bezier(0.4,0,0.2,1)';
+    from.style.transform='scale(1.12)'; from.style.filter='blur(20px)'; from.style.opacity='0';
+    to.style.transition='all 0.7s cubic-bezier(0.4,0,0.2,1)';
     to.style.opacity='1'; to.style.transform='scale(1)'; to.style.filter='blur(0)';
   });
   setTimeout(()=>{
     [from,to].forEach(s=>{ s.style.transition=''; s.style.transform=''; s.style.filter=''; s.style.opacity=''; s.style.display=''; });
     done();
-  },550);
+  },720);
 }
 
 // 3. Circuit Trace (для AWS) — v2
