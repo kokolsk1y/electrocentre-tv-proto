@@ -45,18 +45,15 @@ html, body {
   box-shadow:0 0 30px var(--or), 0 0 80px rgba(232,66,10,0.45), 0 0 120px rgba(232,66,10,0.25);
   opacity:0; z-index:2;
 }
-/* Circuit trace */
-.circuit-svg { position:absolute; inset:0; width:100%; height:100%; }
-.circuit-path-bg { fill:none; stroke:rgba(232,66,10,0.08); stroke-width:2; }
-.circuit-path { fill:none; stroke:var(--or); stroke-width:2.5; stroke-linecap:round;
-  filter:drop-shadow(0 0 4px var(--or)) drop-shadow(0 0 12px rgba(232,66,10,0.4)); }
-.circuit-trail { fill:none; stroke:var(--or2); stroke-width:5; stroke-linecap:round; opacity:0.4;
-  filter:drop-shadow(0 0 8px var(--or)) drop-shadow(0 0 20px rgba(232,66,10,0.3)); }
-.circuit-dot { filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px var(--or)) drop-shadow(0 0 28px rgba(232,66,10,0.5)); }
-.circuit-node { fill:none; stroke:var(--or); stroke-width:1.5; opacity:0;
-  filter:drop-shadow(0 0 4px var(--or)); }
-.circuit-reveal { position:absolute; inset:0; clip-path:polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
-.circuit-flash { position:absolute; inset:0; background:radial-gradient(circle at 100% 52%, rgba(232,66,10,0.15) 0%, transparent 60%); opacity:0; }
+/* Lightning Strike */
+.lightning-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.lightning-bolt { fill:none; stroke:#fff; stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px var(--or)) drop-shadow(0 0 40px var(--or)) drop-shadow(0 0 80px rgba(232,66,10,0.5));
+  opacity:0; }
+.lightning-bolt.bg { stroke:var(--or); stroke-width:12; opacity:0;
+  filter:drop-shadow(0 0 20px var(--or)) drop-shadow(0 0 60px rgba(232,66,10,0.6)); }
+.lightning-flash { position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(255,240,220,0.95) 0%, rgba(255,180,80,0.6) 30%, rgba(232,66,10,0.2) 60%, transparent 100%); opacity:0; mix-blend-mode:screen; }
+.lightning-cover { position:absolute; inset:0; }
 
 /* ══ TOP PROGRESS ══ */
 .top-prog { position:absolute; top:70px; left:0; right:0; height:3px; z-index:250; background:rgba(27,48,115,0.06); }
@@ -937,139 +934,153 @@ function transZoom(from, to, done){
   },720);
 }
 
-// 3. Circuit Trace (для AWS) — v2
+// 3. Lightning Strike — молния со вспышкой (для AWS)
 function transCircuit(from, to, done){
   const overlay = document.createElement('div');
   overlay.className = 'trans-overlay';
-  const svgNS='http://www.w3.org/2000/svg';
-  const svg=document.createElementNS(svgNS,'svg');
-  svg.setAttribute('viewBox','0 0 1920 942'); svg.classList.add('circuit-svg');
 
-  // Путь с узлами-поворотами
-  const pathD='M -20,160 L 160,160 L 160,380 L 420,380 L 420,200 L 720,200 L 720,460 L 1020,460 L 1020,280 L 1320,280 L 1320,500 L 1600,500 L 1600,340 L 1940,340';
-  // Координаты узлов (точки поворота)
-  const nodes = [[160,160],[160,380],[420,380],[420,200],[720,200],[720,460],[1020,460],[1020,280],[1320,280],[1320,500],[1600,500],[1600,340]];
+  // Контейнер с новым слайдом снизу
+  const cover = document.createElement('div');
+  cover.className = 'lightning-cover';
+  cover.style.background = getComputedStyle(to).background || getComputedStyle(to).backgroundColor;
+  cover.style.opacity = '0';
+  overlay.appendChild(cover);
 
-  // Фоновый "призрачный" путь — видно куда пойдёт трасса
-  const pathBg=document.createElementNS(svgNS,'path');
-  pathBg.setAttribute('d',pathD); pathBg.classList.add('circuit-path-bg');
-  svg.appendChild(pathBg);
+  // SVG для молнии
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1920 942');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.classList.add('lightning-svg');
 
-  // Хвост-шлейф (широкий, полупрозрачный)
-  const trail=document.createElementNS(svgNS,'path');
-  trail.setAttribute('d',pathD); trail.classList.add('circuit-trail');
-  svg.appendChild(trail);
+  // Генерируем зигзагообразный путь молнии
+  function generateBolt(startY, endY, segments){
+    const points = [];
+    points.push([-30, startY]);
+    for(let i=1; i<segments; i++){
+      const t = i/segments;
+      const x = t * 1980;
+      const baseY = startY + (endY - startY) * t;
+      const offset = (Math.random() - 0.5) * 280;
+      points.push([x, baseY + offset]);
+    }
+    points.push([1950, endY]);
+    return 'M ' + points.map(p => p.join(',')).join(' L ');
+  }
 
-  // Основной яркий путь
-  const path=document.createElementNS(svgNS,'path');
-  path.setAttribute('d',pathD); path.classList.add('circuit-path');
-  svg.appendChild(path);
+  // Главная молния — пересекает экран по диагонали
+  const startY = 200 + Math.random() * 200;
+  const endY = 500 + Math.random() * 250;
+  const mainPath = generateBolt(startY, endY, 9);
 
-  // Узлы (кольца на поворотах) — появляются когда трасса проходит
-  const nodeEls = nodes.map(([cx,cy])=>{
-    const c=document.createElementNS(svgNS,'circle');
-    c.setAttribute('cx',cx); c.setAttribute('cy',cy);
-    c.setAttribute('r','6'); c.classList.add('circuit-node');
-    svg.appendChild(c);
-    return c;
-  });
+  // Фоновое широкое свечение
+  const boltBg = document.createElementNS(svgNS, 'path');
+  boltBg.setAttribute('d', mainPath);
+  boltBg.classList.add('lightning-bolt', 'bg');
+  svg.appendChild(boltBg);
 
-  // Светящаяся точка с градиентом
-  const defs=document.createElementNS(svgNS,'defs');
-  const grad=document.createElementNS(svgNS,'radialGradient');
-  grad.id='dotGlow'; grad.innerHTML='<stop offset="0%" stop-color="#fff"/><stop offset="30%" stop-color="#FF6B2B"/><stop offset="100%" stop-color="#E8420A" stop-opacity="0"/>';
-  defs.appendChild(grad); svg.appendChild(defs);
-  const dot=document.createElementNS(svgNS,'circle');
-  dot.setAttribute('r','12'); dot.setAttribute('fill','url(#dotGlow)');
-  dot.classList.add('circuit-dot'); dot.style.opacity='0';
-  svg.appendChild(dot);
-  // Яркое ядро точки
-  const dotCore=document.createElementNS(svgNS,'circle');
-  dotCore.setAttribute('r','3'); dotCore.setAttribute('fill','#fff');
-  dotCore.style.opacity='0';
-  svg.appendChild(dotCore);
+  // Основная яркая молния
+  const bolt = document.createElementNS(svgNS, 'path');
+  bolt.setAttribute('d', mainPath);
+  bolt.classList.add('lightning-bolt');
+  svg.appendChild(bolt);
 
-  // Reveal — слайд раскрывается слева направо (wipe-style)
-  const reveal=document.createElement('div');
-  reveal.className='circuit-reveal';
-  reveal.style.background=getComputedStyle(to).background||getComputedStyle(to).backgroundColor;
+  // Ответвления (2-3 короткие молнии от основной)
+  const branches = [];
+  for(let i = 0; i < 3; i++){
+    const branchStartT = 0.25 + i * 0.22;
+    const branchStartX = branchStartT * 1980;
+    const branchStartY = startY + (endY - startY) * branchStartT + (Math.random() - 0.5) * 150;
+    const branchEndX = branchStartX + (Math.random() - 0.5) * 400;
+    const branchEndY = branchStartY + (Math.random() > 0.5 ? 1 : -1) * (150 + Math.random() * 200);
 
-  // Вспышка при завершении трассы
-  const flash=document.createElement('div');
-  flash.className='circuit-flash';
+    const bp = [];
+    bp.push([branchStartX, branchStartY]);
+    bp.push([branchStartX + (branchEndX - branchStartX) * 0.4 + (Math.random() - 0.5) * 80,
+             branchStartY + (branchEndY - branchStartY) * 0.4 + (Math.random() - 0.5) * 80]);
+    bp.push([branchEndX, branchEndY]);
+    const branchD = 'M ' + bp.map(p => p.join(',')).join(' L ');
 
-  overlay.appendChild(reveal); overlay.appendChild(flash); overlay.appendChild(svg);
+    const bg = document.createElementNS(svgNS, 'path');
+    bg.setAttribute('d', branchD);
+    bg.classList.add('lightning-bolt', 'bg');
+    bg.style.strokeWidth = '8';
+    svg.appendChild(bg);
+
+    const br = document.createElementNS(svgNS, 'path');
+    br.setAttribute('d', branchD);
+    br.classList.add('lightning-bolt');
+    br.style.strokeWidth = '3';
+    svg.appendChild(br);
+
+    branches.push({bg, br});
+  }
+
+  // Вспышка на весь экран
+  const flash = document.createElement('div');
+  flash.className = 'lightning-flash';
+  overlay.appendChild(flash);
+
+  overlay.appendChild(svg);
   stage.appendChild(overlay);
 
-  const pathLen=path.getTotalLength();
-  // Основной путь
-  path.style.strokeDasharray=pathLen; path.style.strokeDashoffset=pathLen;
-  // Хвост (чуть отстаёт)
-  trail.style.strokeDasharray=pathLen; trail.style.strokeDashoffset=pathLen;
+  const start = performance.now();
 
-  // Рассчитаем позиции узлов на пути (0..1)
-  const nodePositions = nodes.map(([nx,ny])=>{
-    let best=0, bestDist=Infinity;
-    for(let i=0;i<=100;i++){
-      const t=i/100;
-      const pt=path.getPointAtLength(pathLen*t);
-      const d=Math.hypot(pt.x-nx, pt.y-ny);
-      if(d<bestDist){bestDist=d; best=t;}
-    }
-    return best;
-  });
-
-  const traceDur=900, pauseDur=120, revealDur=400;
-  const start=performance.now();
+  // Тайминг:
+  // 0-180мс: молния появляется (резко, без плавности — как настоящая)
+  // 180-350мс: яркая вспышка на весь экран
+  // 350-650мс: затухание + раскрытие нового слайда
+  const PHASE1 = 180;  // молния
+  const PHASE2 = 350;  // вспышка пик
+  const PHASE3 = 650;  // финал
 
   (function tick(now){
-    const elapsed=now-start;
+    const elapsed = now - start;
 
-    // Фаза 1: трассировка
-    if(elapsed < traceDur){
-      const t=elapsed/traceDur;
-      // Easing: быстрый старт, замедление к концу
-      const ease = 1-Math.pow(1-t, 2.5);
-      const trailEase = 1-Math.pow(1-Math.max(0, t-0.08), 2.5); // отстаёт на 8%
-
-      path.style.strokeDashoffset = pathLen*(1-ease);
-      trail.style.strokeDashoffset = pathLen*(1-trailEase);
-
-      const pt=path.getPointAtLength(pathLen*ease);
-      dot.setAttribute('cx',pt.x); dot.setAttribute('cy',pt.y); dot.style.opacity='1';
-      dotCore.setAttribute('cx',pt.x); dotCore.setAttribute('cy',pt.y); dotCore.style.opacity='1';
-
-      // Показываем узлы когда трасса проходит через них
-      nodePositions.forEach((np,i)=>{
-        if(ease >= np && nodeEls[i].style.opacity!=='1'){
-          nodeEls[i].style.opacity='1';
-          nodeEls[i].style.transition='opacity 0.2s';
-          // Пульс узла
-          nodeEls[i].setAttribute('r','6');
-          setTimeout(()=>nodeEls[i].setAttribute('r','4'), 150);
+    if(elapsed < PHASE1){
+      // Молния появляется ступенчато
+      const t = elapsed / PHASE1;
+      // Молния "проявляется" толчками — мерцание
+      const flicker = (Math.sin(t * 30) + 1) / 2;
+      const opacity = Math.min(1, t * 3) * (0.7 + flicker * 0.3);
+      bolt.style.opacity = opacity;
+      boltBg.style.opacity = opacity * 0.8;
+      branches.forEach((b, i) => {
+        if(t > 0.2 + i * 0.15){
+          b.bg.style.opacity = (0.5 + flicker * 0.4);
+          b.br.style.opacity = (0.7 + flicker * 0.3);
         }
       });
     }
-    // Фаза 2: пауза + вспышка
-    else if(elapsed < traceDur+pauseDur){
-      dot.style.opacity='0'; dotCore.style.opacity='0';
-      path.style.strokeDashoffset='0'; trail.style.strokeDashoffset='0';
-      const t2=(elapsed-traceDur)/pauseDur;
-      flash.style.opacity = Math.sin(t2*Math.PI)*0.8;
-      // Начинаем гасить SVG
-      svg.style.opacity = 1 - t2*0.6;
+    else if(elapsed < PHASE2){
+      // Пик вспышки — экран заливает белым
+      const t = (elapsed - PHASE1) / (PHASE2 - PHASE1);
+      const flashOp = 1 - t * 0.15;
+      flash.style.opacity = flashOp;
+      bolt.style.opacity = '1';
+      boltBg.style.opacity = '1';
+      branches.forEach(b => { b.bg.style.opacity = '0.9'; b.br.style.opacity = '1'; });
+      // Начинаем показывать новый слайд под вспышкой
+      cover.style.opacity = (t * 0.5).toString();
     }
-    // Фаза 3: раскрытие нового слайда
-    else if(elapsed < traceDur+pauseDur+revealDur){
-      flash.style.opacity='0';
-      svg.style.opacity = Math.max(0, 0.4 - ((elapsed-traceDur-pauseDur)/revealDur)*0.4);
-      const t3=(elapsed-traceDur-pauseDur)/revealDur;
-      const ease3 = t3<0.5 ? 2*t3*t3 : 1-Math.pow(-2*t3+2,2)/2;
-      // Раскрытие wipe справа налево
-      const pct = ease3 * 110;
-      reveal.style.clipPath = 'polygon('+(100-pct)+'% 0, 100% 0, 100% 100%, '+(100-pct)+'% 100%)';
+    else if(elapsed < PHASE3){
+      // Затухание вспышки, новый слайд проявляется
+      const t = (elapsed - PHASE2) / (PHASE3 - PHASE2);
+      const ease = 1 - Math.pow(1 - t, 2);
+      flash.style.opacity = (1 - ease) * 0.85;
+      bolt.style.opacity = (1 - ease) * 0.8;
+      boltBg.style.opacity = (1 - ease) * 0.6;
+      branches.forEach(b => {
+        b.bg.style.opacity = (1 - ease) * 0.5;
+        b.br.style.opacity = (1 - ease) * 0.7;
+      });
+      cover.style.opacity = (0.5 + ease * 0.5).toString();
     }
-    else { stage.removeChild(overlay); done(); return; }
+    else {
+      stage.removeChild(overlay);
+      done();
+      return;
+    }
     requestAnimationFrame(tick);
   })(performance.now());
 }
